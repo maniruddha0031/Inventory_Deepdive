@@ -1,0 +1,55 @@
+/* ============================================================
+   Typography — matches Schedule_App (Tasksy design system:
+   Schedule_App/design-system/colors_and_type.css + tasksy-skin.css)
+     text      Geist                 (--font-sans)
+     display   Bricolage Grotesque   (--font-display) headings + big values
+     numbers   Geist Mono            (--font-mono)
+     scale     11 / 12 / 13 / 14 (body) / 16 / 18 / 22 / 28 / 36 px
+     weights   400 / 500 / 600 / 700
+   Loaded after every other stylesheet. Font sizes and weights in the
+   other files are already snapped to this scale.
+   ============================================================ */
+:root{
+  --font-sans:    "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Geist", system-ui, sans-serif;
+  --font-mono:    "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --mono:         var(--font-mono);
+  --track-tight:  -0.01em;
+}
+
+/* ---- text font everywhere (icon fonts keep their own) ---- */
+html, body{
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body{ font-size: 14px; }
+input, select, textarea, button, table{ font-family: inherit; }
+
+/* ---- display: page/section headings + big numeric values ---- */
+h1, h2, h3,
+.si-title,
+.dd-section .h,
+.kpi-card .value,
+.dd-modal-title,
+.dz-title,
+.dz-stat-val,
+.dz-mini-val,
+.dd-zoom-stats .val,
+.nui-dtitle,
+.nui-chip-value,
+.ahb-hero-val,
+.ahb-hero-stat .v,
+.ahb-ra-val,
+.ahb-imp-chart .n,
+.lm-wcard-val,
+.chatbox-header-title,
+.kpi .val b{
+  font-family: var(--font-display);
+  letter-spacing: var(--track-tight);
+}
+
+/* tabular digits for stats, tables and tiles (Schedule_App: tnum/lnum) */
+table, .kpi-card, .ahb-tbl, .dd-table, .foot, .ahb-hero-stats{
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}

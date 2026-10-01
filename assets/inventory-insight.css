@@ -1,0 +1,133 @@
+/* ============================================================
+   Inventory Insight — additions on top of schedule-insight.css
+   (the Deep Dive look is shared; only inventory-only pieces live here)
+   ============================================================ */
+
+/* single tab strip: Deep Dive is the only live tab */
+.si-tab.soon{opacity:.55;cursor:not-allowed}
+.si-tab.soon em{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#eef1f7;color:#6b7280;border-radius:5px;padding:1px 5px;margin-left:2px}
+
+/* count frequency segmented control (first thing in the range bar) and
+   the View By (Major / Minor category) toggle next to the level chips */
+.iv-freqseg,.iv-viewby{display:flex;align-items:center;gap:2px;background:#f3f4f8;border:1px solid #e6e8f0;border-radius:12px;padding:4px;flex-wrap:wrap}
+.iv-freqseg-l,.iv-viewby span{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#8a93a3;padding:0 8px 0 6px}
+.iv-freqseg button,.iv-viewby button{border:0;background:transparent;color:#4b5563;font-size:13px;font-weight:600;height:32px;padding:0 14px;border-radius:9px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.iv-freqseg button:hover,.iv-viewby button:hover{background:#fff;color:#111827}
+.iv-freqseg button.on{background:#0f2149;color:#fff;box-shadow:0 2px 6px rgba(15,33,73,.25)}
+.iv-viewby button{height:30px;font-size:12.5px;padding:0 12px}
+.iv-viewby button.on{background:#fff;color:#6D28D9;box-shadow:0 1px 3px rgba(16,24,40,.12)}
+
+/* level chips + View By share a row under the section title */
+.iv-dimrow{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.iv-dimchips{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:thin}
+.iv-dimchips .dd-dimchip{padding:0 12px;white-space:nowrap}
+
+/* badges */
+.iv-sup-badge{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:12px;font-weight:800;letter-spacing:.02em;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.iv-sup-badge.sm{width:24px;height:24px;font-size:10px}
+.iv-ctx{gap:8px;font-size:13px;font-weight:600;color:#1f2937}
+.iv-cal-note{display:block;font-style:normal;font-size:11px;color:#9aa2ae;margin-top:2px}
+.dd-day-ic i{letter-spacing:.04em}
+.dd-day-ic.iv-f-daily i{background:#b91c1c}
+.dd-day-ic.iv-f-weekly i{background:#1d4ed8}
+.dd-day-ic.iv-f-monthly i{background:#15803d}
+.iv-miss-badge{font-size:11px;font-weight:700;color:#6d28d9;background:#ede9fe;border-radius:999px;padding:2px 7px;text-transform:uppercase;letter-spacing:.02em;cursor:help}
+.iv-status{display:inline-flex;font-size:12px;font-weight:600;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.iv-status.ok{color:#15803d;background:#dcfce7}
+.iv-status.pending{color:#b45309;background:#fef3c7}
+.iv-short{font-size:10px;font-weight:700;color:#0369a1;background:#e0f2fe;border-radius:5px;padding:1px 5px;margin-left:4px;text-transform:uppercase}
+.iv-warn-t{color:#6d28d9;font-weight:700}
+.dd-metric-cell.iv-text{font-size:13px;color:#374151;white-space:nowrap}
+.dd-metric-cell.iv-plain{min-width:96px}
+.dd-cal-d.iv-cnt{position:relative}
+.dd-cal-d.iv-cnt::after{content:"";position:absolute;left:50%;bottom:3px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#6D28D9}
+.dd-cal-d.iv-cnt.sel::after{background:#fff}
+
+/* second line under a value: "$ · %" of the variance-detail pairs */
+.iv-sub{font-size:11.5px;color:#6b7280;font-weight:500;margin-top:2px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.iv-sub.flag{color:#B42318;font-weight:600}
+
+/* Ingredient level: category header rows with $ | % subtotals */
+.dd-table tr.iv-cathead td{background:#f5f3ff;border-bottom:1px solid #e9e3fb;padding:9px 12px;font-size:12px;font-weight:700;color:#4c1d95;white-space:nowrap}
+.dd-table tr.iv-cathead td.iv-cathead-n{font-size:13px}
+.dd-table tr.iv-cathead td.iv-cathead-n span{font-weight:500;color:#8b7bc4;margin-left:8px;font-size:11px}
+.dd-table tr.iv-cathead:hover{background:transparent}
+.dd-table tr.iv-cathead td.dd-drill-cell{background:#f5f3ff}
+
+
+/* Detailed view column stays pinned on the right when a wide table scrolls */
+.dd-table th.iv-drill-th{position:sticky;right:0;z-index:4;box-shadow:-8px 0 10px -8px rgba(16,24,40,.18)}
+.dd-table td.dd-drill-cell{position:sticky;right:0;z-index:1;background:#fff;box-shadow:-8px 0 10px -8px rgba(16,24,40,.18)}
+.dd-table tbody tr:hover td.dd-drill-cell{background:#fafaff}
+
+/* Detailed view "+N" button and its popover */
+.dd-drill.iv-more{background:#f1f3f8;color:#4b5563;font-size:11px;font-weight:700;font-family:inherit}
+.dd-drill.iv-more:hover{background:#e7e9f0;color:#111827}
+.dd-drill.iv-bd-btn{box-shadow:inset 0 0 0 1.5px #5eead4}
+.iv-more-pop{position:fixed;right:auto;top:0;min-width:240px;z-index:90}
+
+/* ---- Inventory Breakdown pop-up ---- */
+.dd-modal.dz.iv-bd{max-width:1240px}
+.iv-bd-h{font-size:13px;font-weight:700;color:#0f2149;background:#e8f1fc;text-align:center;padding:9px 12px;border-bottom:1px solid #d6e4f5}
+.iv-bd-sum{margin-top:16px;border:1px solid #d6e4f5;border-radius:12px;overflow:hidden}
+.iv-bd-sum-g{display:grid;grid-template-columns:repeat(9,minmax(0,1fr))}
+.iv-bd-sum-g div{padding:10px 12px;border-right:1px solid #eef1f6;min-width:0}
+.iv-bd-sum-g div:last-child{border-right:0}
+.iv-bd-sum-g span{display:block;font-size:11.5px;color:#6b7280;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iv-bd-sum-g b{display:block;font-size:15px;color:#111827;margin-top:3px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.iv-bd-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+.iv-bd-card{border:1px solid #d6e4f5;border-radius:12px;overflow:hidden;min-width:0}
+.iv-bd-scroll{max-height:232px;overflow:auto;scrollbar-width:thin}
+.iv-bd-t{width:100%;border-collapse:collapse;font-size:12.5px}
+.iv-bd-t th{position:sticky;top:0;background:#f7f9fc;color:#374151;font-weight:700;text-align:left;padding:8px 12px;border-bottom:1px solid #e6ebf3;white-space:nowrap}
+.iv-bd-t td{padding:7px 12px;border-bottom:1px solid #f0f2f6;color:#1f2937;white-space:nowrap;font-variant-numeric:tabular-nums}
+.iv-bd-t .r{text-align:right}
+.iv-bd-t tfoot td{position:sticky;bottom:0;background:#f7f9fc;font-weight:700;border-top:1px solid #e6ebf3;border-bottom:0}
+.iv-bd-empty{padding:22px;text-align:center;color:#9aa2ae;font-size:13px}
+
+/* kpi row: 9 tiles wrap cleanly */
+.dd-kpirow .kpi-card{min-width:175px}
+.kt-click{cursor:pointer}
+
+@media (max-width:1100px){ .iv-bd-sum-g{grid-template-columns:repeat(3,minmax(0,1fr))} .iv-bd-grid{grid-template-columns:1fr} }
+@media (max-width:720px){
+  .topbar{gap:10px;overflow:hidden}
+  .topbar .center,.topbar .store-pill{display:none}
+  .si-subheader{padding:12px 16px}
+  .si-body{padding:12px 16px 24px}
+  .dd-presets{flex-wrap:nowrap;overflow-x:auto;max-width:100%}
+  .iv-freqseg{width:100%}
+  .dd-kpirow .kpi-card{min-width:100%}
+  .dd-section-row,.dd-tb-row{width:100%}
+  .dd-toolbar{width:100%}
+  .dd-tb-row .dd-tb-search{min-width:0;flex:1 1 100%}
+  .dd-table th.iv-drill-th,.dd-table td.dd-drill-cell{position:static;box-shadow:none}
+  .iv-bd-sum-g{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* ---- dark theme ---- */
+html.theme-dark .iv-freqseg,html.theme-dark .iv-viewby{background:var(--dk-sunk);border-color:var(--dk-line)}
+html.theme-dark .iv-freqseg-l,html.theme-dark .iv-viewby span{color:var(--dk-text3)}
+html.theme-dark .iv-freqseg button,html.theme-dark .iv-viewby button{color:var(--dk-text2)}
+html.theme-dark .iv-freqseg button:hover,html.theme-dark .iv-viewby button:hover{background:var(--dk-elev);color:var(--dk-text)}
+html.theme-dark .iv-freqseg button.on{background:var(--dk-grad);color:#fff}
+html.theme-dark .iv-viewby button.on{background:var(--dk-elev);color:#c4b5fd}
+html.theme-dark .iv-sup-badge{background-image:linear-gradient(rgba(12,17,31,.62),rgba(12,17,31,.62)) !important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+html.theme-dark .iv-ctx{color:var(--dk-text)}
+html.theme-dark .dd-drill.iv-more{background:var(--dk-elev);color:var(--dk-text2)}
+html.theme-dark .si-tab.soon em{background:var(--dk-elev);color:var(--dk-text3)}
+html.theme-dark .iv-sub{color:var(--dk-text3)}
+html.theme-dark .dd-metric-cell.iv-text{color:var(--dk-text2)}
+html.theme-dark .iv-status.ok{background:rgba(34,197,94,.15);color:#4ade80}
+html.theme-dark .iv-status.pending{background:rgba(245,158,11,.15);color:#fbbf24}
+html.theme-dark .iv-miss-badge{background:rgba(139,92,246,.18);color:#c4b5fd}
+html.theme-dark .dd-table td.dd-drill-cell{background:var(--dk-card)}
+html.theme-dark .dd-table tbody tr:hover td.dd-drill-cell{background:var(--dk-elev)}
+html.theme-dark .dd-table tr.iv-cathead td,html.theme-dark .dd-table tr.iv-cathead td.dd-drill-cell{background:#1d1840;border-color:var(--dk-line);color:#c4b5fd}
+html.theme-dark .iv-bd-h{background:#16233b;color:var(--dk-text);border-color:var(--dk-line)}
+html.theme-dark .iv-bd-sum,html.theme-dark .iv-bd-card{border-color:var(--dk-line)}
+html.theme-dark .iv-bd-sum-g div{border-color:var(--dk-line2)}
+html.theme-dark .iv-bd-sum-g span{color:var(--dk-text3)}
+html.theme-dark .iv-bd-sum-g b,html.theme-dark .iv-bd-t td{color:var(--dk-text)}
+html.theme-dark .iv-bd-t th,html.theme-dark .iv-bd-t tfoot td{background:var(--dk-elev);color:var(--dk-text2);border-color:var(--dk-line)}
+html.theme-dark .iv-bd-t td{border-color:var(--dk-line2)}
