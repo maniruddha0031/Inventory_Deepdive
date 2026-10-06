@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inventory Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0f2149;
+    --page:#eef1f7;
+    --teal:#12a37f;
+    --blue:#5b9cf6;
+    --purple:#8b4fbe;
+    --salmon:#f4685b;
+    --ink:#1f2937;
+    --muted:#6b7280;
+    --line:#e6e9f0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--page);font-family:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;color:var(--ink);font-size:13px}
+  .app{display:flex;min-height:100vh}
+
+  /* ---------- left rail (Zip Inventory menu) ---------- */
+  .rail{width:47px;flex:0 0 47px;background:var(--navy);display:flex;flex-direction:column;align-items:center;position:sticky;top:0;height:100vh}
+  .rail .logo{width:47px;height:42px;display:grid;place-items:center;background:#2ea3d8}
+  .rail .icons{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:6px;flex:1}
+  .rail button{width:38px;height:38px;border:0;background:transparent;border-radius:8px;display:grid;place-items:center;cursor:pointer;color:#9fc9e8}
+  .rail button:hover{background:rgba(255,255,255,.10);color:#fff}
+  .rail button.active{background:#fff;color:#1b8fc4}
+  .rail .fab{width:38px;height:38px;border-radius:50%;background:#1b8fc4;color:#fff;display:grid;place-items:center;border:3px solid #e9ebf5;margin-bottom:12px}
+
+  /* ---------- top bar ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{height:42px;background:var(--navy);color:#fff;display:flex;align-items:center;gap:20px;padding:0 12px}
+  .tb{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+  .caret{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor}
+  .center{margin-left:auto;margin-right:auto;display:flex;align-items:center;gap:14px;font-size:13px}
+  .center .divider{opacity:.45}
+  .clock{display:flex;align-items:baseline;gap:6px}
+  .clock .sup{font-size:11px;position:relative;top:-5px;left:-5px}
+  .clock .tz{font-weight:600;letter-spacing:.2px}
+  .right{display:flex;align-items:center;gap:12px;margin-left:auto}
+  .store-pill{background:#fff;color:var(--navy);border-radius:20px;padding:6px 12px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+  .avatar-top{width:28px;height:28px;border-radius:50%;background:#8d93a8;display:grid;place-items:center;color:#e8eaf2}
+
+  /* ---------- content ---------- */
+  .content{padding:10px 10px 14px;display:flex;flex-direction:column;gap:10px}
+
+  /* KPI row: white date box + coloured value block (HubWorks zInvDashboard) */
+  .kpi-row{display:flex;gap:14px;align-items:stretch}
+  .kpi{flex:1 1 0;min-width:0;border-radius:6px;background:#fff;box-shadow:0 1px 2px rgba(21,29,74,.08);display:flex;align-items:stretch;height:62px;cursor:pointer;position:relative;border:0;padding:0;font-family:inherit;text-align:left}
+  .kpi .dt{flex:0 0 76px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+  .kpi .dt b{font-size:22px;font-weight:600}
+  .kpi .dt span{font-size:12px;font-weight:600;color:#4b5563;letter-spacing:.3px}
+  .kpi .val{flex:1;border-radius:0 6px 6px 0;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;padding:0 8px;text-align:center;min-width:0}
+  .kpi .val b{font-size:22px;font-weight:600;white-space:nowrap}
+  .kpi .val span{font-size:12px;white-space:nowrap}
+  .kpi.teal .val{background:var(--teal)}   .kpi.teal .dt b{color:var(--teal)}
+  .kpi.blue .val{background:var(--blue)}   .kpi.blue .dt b{color:var(--blue)}
+  .kpi.purple .val{background:var(--purple)} .kpi.purple .dt b{color:var(--purple)}
+  .kpi.salmon .val{background:var(--salmon)} .kpi.salmon .dt b{color:var(--salmon)}
+  .kpi:hover{box-shadow:0 2px 8px rgba(21,29,74,.16)}
+  .kpi.on::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #fff;filter:drop-shadow(0 1px 0 rgba(21,29,74,.08))}
+  .kpi:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+
+  /* AI INSIGHT tile (same as the Schedule dashboard) */
+  .ai-wrap{flex:0 0 328px;display:flex;align-items:center}
+  .ai-tile{width:100%;height:62px;border-radius:12px;background:linear-gradient(100deg,#9b1ee6 0%,#a51fe0 38%,#c31fcf 72%,#d31fc4 100%);color:#fff;padding:7px 14px 8px;display:flex;flex-direction:column;justify-content:center;gap:3px;box-shadow:0 2px 6px rgba(155,30,230,.28);text-decoration:none}
+  .ai-tile:hover{box-shadow:0 4px 12px rgba(155,30,230,.4)}
+  .ai-head{display:flex;align-items:center;gap:8px}
+  .ai-head .label{font-size:13px;font-weight:700;letter-spacing:.2px;color:#fff}
+  .ai-head .more{margin-left:auto;font-size:13px;font-weight:700;color:#fff;text-decoration:underline;text-underline-offset:2px}
+  .ai-body{display:flex;align-items:center;gap:9px;padding-left:2px;min-width:0}
+  .ai-body .bar{width:2px;height:16px;background:rgba(255,255,255,.85);border-radius:2px;flex:none}
+  .ai-body .msg{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .3s}
+
+  /* cards */
+  .card{background:#fff;border-radius:4px;box-shadow:0 1px 2px rgba(21,29,74,.08);overflow:hidden}
+  .charts{display:grid;grid-template-columns:1fr 1fr}
+  .charts > div{padding:14px 18px 16px;min-width:0}
+  .charts > div + div{border-left:1px solid var(--line)}
+  .chart-t{text-align:center;font-size:15px;font-weight:500;color:#2b3350;margin:0 0 6px}
+  .chart-sub{text-align:center;font-size:11.5px;color:#9aa2ae;margin:-2px 0 4px}
+  svg text{font-family:"Geist",system-ui,sans-serif}
+  .donut-wrap{display:flex;align-items:center;gap:10px}
+  .donut-wrap svg{flex:1;min-width:0}
+  .legend{flex:0 0 170px;display:flex;flex-direction:column;gap:12px;font-size:12px;color:#2b3350}
+  .legend div{display:flex;align-items:center;gap:8px;white-space:nowrap}
+  .legend i{width:22px;height:6px;border-radius:1px;flex:none}
+  .tip{position:fixed;pointer-events:none;background:#0f2149;color:#fff;font-size:12px;padding:6px 9px;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.2);opacity:0;transition:opacity .12s;z-index:20;white-space:nowrap}
+  .tip.show{opacity:1}
+
+  .row{display:flex;gap:22px;align-items:flex-start}
+  .col{flex:1 1 0;min-width:0}
+  .card-head{display:flex;align-items:center;gap:8px;padding:10px 10px;font-size:13px;font-weight:600;color:#2b3350;background:#f6f8fb;border-bottom:1px solid var(--line)}
+  .badge{min-width:22px;height:22px;border-radius:11px;background:#1b72c4;color:#fff;font-size:12px;font-weight:600;display:grid;place-items:center;padding:0 6px}
+  .na-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid #eef1f6;text-decoration:none;color:inherit}
+  .na-row:hover{background:#f8fafd}
+  .na-ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none}
+  .na-tx{flex:1;min-width:0}
+  .na-tx b{display:block;font-size:13px;font-weight:600;color:#2b3350}
+  .na-tx span{font-size:12px;color:var(--muted)}
+  .na-st{font-size:12px;font-weight:600;color:#b45309;background:#fef3c7;border-radius:999px;padding:2px 10px;white-space:nowrap}
+  .na-empty{margin:10px;padding:8px;background:#f3f4f6;color:var(--muted);text-align:center;border-radius:3px}
+
+  table.vs{width:100%;border-collapse:collapse;font-size:13px}
+  table.vs th{font-weight:600;text-align:left;padding:9px 10px;color:#2b3350;border-bottom:2px solid #e6e9f0}
+  table.vs td{padding:8px 10px;border-bottom:1px solid #eef1f6;color:#2b3350}
+  table.vs th.r,table.vs td.r{text-align:right;font-variant-numeric:tabular-nums}
+  table.vs th.c,table.vs td.c{text-align:center;font-variant-numeric:tabular-nums}
+  table.vs tr.grp td{background:#f6f8fb;font-weight:500}
+  table.vs td.pos{color:#b42318}
+  table.vs td.neg{color:#0d8a4e}
+
+  @media (max-width:1200px){
+    .kpi-row{flex-wrap:wrap}
+    .kpi{flex:1 1 calc(50% - 14px)}
+    .ai-wrap{flex:1 1 100%}
+    .charts{grid-template-columns:1fr}
+    .charts > div + div{border-left:0;border-top:1px solid var(--line)}
+    .row{flex-direction:column}
+    .col{width:100%}
+  }
+  @media (max-width:640px){
+    .topbar .center,.topbar .tb.loc{display:none}
+    .kpi{flex:1 1 100%}
+    .legend{flex-basis:130px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= LEFT RAIL (Zip Inventory menu) ================= -->
+  <aside class="rail">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>
+    </div>
+    <div class="icons">
+      <button class="active" title="Dashboard"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg></button>
+      <button title="Ordering"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.5L21.5 8H6"/></svg></button>
+      <button title="Inventory count"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h4"/></svg></button>
+      <button title="Invoices"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5v17l2.5-1.6 2.5 1.6 2-1.6 2 1.6 2.5-1.6 2.5 1.6v-17z"/><path d="M9 8.5h6M9 12.5h6"/></svg></button>
+      <button title="Waste"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+      <button title="Transfer"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4-4 4M21 7H9M7 21l-4-4 4-4M3 17h12"/></svg></button>
+      <button title="Recipes"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></button>
+      <button title="Reports"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></button>
+    </div>
+    <div class="fab" title="Support">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <!-- ================= TOP BAR ================= -->
+    <header class="topbar">
+      <div class="tb">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        My Apps <i class="caret"></i>
+      </div>
+      <div class="tb loc">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>
+        007 - Encinitas <i class="caret"></i>
+      </div>
+      <div class="center">
+        <div class="tb" style="gap:6px">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#cfe3f5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.2 4.2 0 0 1-.4-8.4A5.7 5.7 0 0 1 17.6 10 4 4 0 0 1 17.2 18z"/></svg>
+          78 &deg;F
+        </div>
+        <span class="divider">|</span>
+        <div class="clock"><span>06:23</span><span class="sup">A</span><span class="tz">AMERICA/LOS ANGELES</span></div>
+      </div>
+      <div class="right">
+        <div class="store-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 9h16v11H4zM3 9l2-4h14l2 4"/><path d="M9 20v-6h6v6"/></svg>
+          Original Fish Taco, LLC <i class="caret"></i>
+        </div>
+        <div class="avatar-top">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= CONTENT ================= -->
+    <div class="content">
+
+      <!-- KPI ROW (last weekly inventory: Sun 09/27) + AI INSIGHT -->
+      <div class="kpi-row">
+        <button class="kpi teal on" data-m="inv" onclick="dbSelect('inv')" title="Show the Inventory $ trend">
+          <div class="dt"><b>27</b><span>SUN</span></div>
+          <div class="val"><b>$ 16,468.50</b><span>Inventory $</span></div>
+        </button>
+        <button class="kpi blue" data-m="dlv" onclick="dbSelect('dlv')" title="Show the Weekly Deliveries trend">
+          <div class="dt"><b>27</b><span>SUN</span></div>
+          <div class="val"><b>$ 13,787.74</b><span>Weekly Deliveries</span></div>
+        </button>
+        <button class="kpi purple" data-m="afc" onclick="dbSelect('afc')" title="Show the Act. Food Cost % trend">
+          <div class="dt"><b>27</b><span>SUN</span></div>
+          <div class="val"><b>28.69 %</b><span>Act. Food Cost %</span></div>
+        </button>
+        <button class="kpi salmon" data-m="var" onclick="dbSelect('var')" title="Show the Variance % trend">
+          <div class="dt"><b>27</b><span>SUN</span></div>
+          <div class="val"><b>1.40 %</b><span>Variance %</span></div>
+        </button>
+
+        <!-- AI INSIGHT TILE -->
+        <div class="ai-wrap">
+          <a class="ai-tile" href="index.html" title="Open Inventory AI Insight">
+            <div class="ai-head">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/><path d="M19 1.5l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z" fill="#fff"/></svg>
+              <span class="label">Inventory AI Insight</span>
+              <span class="more">View More</span>
+            </div>
+            <div class="ai-body">
+              <span class="bar"></span>
+              <span class="msg" id="aiMsg">Act. Food Cost % is 1.40 pts above ideal</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- TREND + DONUT -->
+      <div class="card charts">
+        <div>
+          <div class="chart-t" id="lineTitle">Inventory $</div>
+          <div class="chart-sub">Last 7 weekly inventories · the Aug 16 count was missed, so Aug 23 covers 2 weeks</div>
+          <svg id="lineSvg" viewBox="0 0 820 300" width="100%" role="img" aria-label="Weekly trend"></svg>
+        </div>
+        <div>
+          <div class="chart-t" id="donutTitle">Inventory $</div>
+          <div class="chart-sub" id="donutSub">By category · Sep 27 weekly count</div>
+          <div class="donut-wrap">
+            <svg id="donutSvg" viewBox="0 0 440 250" role="img" aria-label="By category"></svg>
+            <div class="legend" id="legend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEEDING ACTION + VARIANCE SUMMARY -->
+      <div class="row">
+        <div class="col card">
+          <div class="card-head">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15V10a6 6 0 1 0-12 0v5l-2 3h16z"/><path d="M10 21h4"/></svg>
+            Needing Action <span class="badge">3</span>
+          </div>
+          <a class="na-row" href="index.html#deepdive" title="Open in Deep Dive">
+            <span class="na-ic" style="background:#dbeafe;color:#1d4ed8"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></span>
+            <span class="na-tx"><b>Un-Finalized Inventory · Weekly</b><span>Sun 09/27 · 22 items · 11 warnings</span></span>
+            <span class="na-st">Un-Finalized</span>
+          </a>
+          <a class="na-row" href="index.html#deepdive" title="Open in Deep Dive">
+            <span class="na-ic" style="background:#fee2e2;color:#b91c1c"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></span>
+            <span class="na-tx"><b>Un-Finalized Inventory · Daily</b><span>Wed 09/30 · 8 items · 4 warnings</span></span>
+            <span class="na-st">Un-Finalized</span>
+          </a>
+          <a class="na-row" href="index.html#deepdive" title="Open in Deep Dive">
+            <span class="na-ic" style="background:#dcfce7;color:#15803d"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span>
+            <span class="na-tx"><b>Un-Finalized Menu Mix</b><span>Wed 09/30 · sales updated 10/01/2026 05:33 AM</span></span>
+            <span class="na-st">Un-Finalized</span>
+          </a>
+          <div class="na-row" style="cursor:default">
+            <span class="na-ic" style="background:#f1f3f8;color:#6b7280"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4-4 4M21 7H9M7 21l-4-4 4-4M3 17h12"/></svg></span>
+            <span class="na-tx"><b>Un-Finalized Transfer In</b><span>All transfers finalized</span></span>
+            <span class="na-st" style="color:#15803d;background:#dcfce7">0</span>
+          </div>
+        </div>
+
+        <div class="col card">
+          <div class="card-head">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c83c9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M5 7h14"/><path d="M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/></svg>
+            Variance Summary
+          </div>
+          <table class="vs">
+            <thead><tr><th>Item Name</th><th class="c">Var. $</th><th class="r">Var. % of Ideal</th></tr></thead>
+            <tbody id="vsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+/* Figures are the Sep 27 weekly count of inv-deepdive-data.js (the same
+   simulation the Insight page's Deep Dive tab aggregates). HubWorks
+   zInvDashboard: tiles = last weekly inventory, trend = last 7 posted
+   weekly inventories, donut = the selected tile's $ by category. */
+const DB_WEEKS = ['Aug 09','Aug 23','Aug 30','Sep 06','Sep 13','Sep 20','Sep 27'];
+const DB_NOTE  = {1:'2-week count (Aug 16 was missed)', 4:'Syrup over-counted by 9 BIBs', 5:'Corrects the Sep 13 syrup miscount', 6:'Un-Finalized'};
+const DB_METRICS = {
+  inv:{ title:'Inventory $',         fmt:'money', col:'#2f8f62', vals:[16467.10,16011.55,16069.29,16139.54,17214.26,16395.72,16468.50], donut:'Inventory $' },
+  dlv:{ title:'Weekly Deliveries',   fmt:'money', col:'#3b7ddd', vals:[15552.72,28911.20,14801.16,13740.93,14653.79,13565.03,13787.74], donut:'Deliveries $' },
+  afc:{ title:'Act. Food Cost %',    fmt:'pct',   col:'#8b4fbe', vals:[27.25,27.23,27.39,27.31,26.17,29.40,28.69], donut:'Actual Usage $' },
+  var:{ title:'Variance %',          fmt:'pct',   col:'#e0564a', vals:[0.64,0.66,0.70,0.65,-0.40,2.22,1.40], donut:'Variance $' },
+};
+/* by category, Sep 27 weekly count: inventory $, deliveries $, actual usage $, variance $ */
+const DB_CATS = [
+  { n:'Seafood',             c:'#4a77a8', inv:6780.85, dlv:6107.11, afc:6074.69, var:276.25 },
+  { n:'Meat & Poultry',      c:'#7a1f1f', inv:1898.78, dlv:2923.10, afc:2696.41, var:197.06 },
+  { n:'Produce',             c:'#4ccb7a', inv:1729.09, dlv:1690.83, afc:1960.79, var:157.54 },
+  { n:'Dairy & Cheese',      c:'#d4a72c', inv:1823.53, dlv:791.38,  afc:1092.71, var:35.20 },
+  { n:'Tortillas & Chips',   c:'#e2531f', inv:1602.81, dlv:792.60,  afc:1067.63, var:31.10 },
+  { n:'Sauces & Condiments', c:'#1414c4', inv:792.80,  dlv:406.09,  afc:322.17,  var:4.36 },
+  { n:'Beverage',            c:'#8a8f98', inv:1840.64, dlv:1076.63, afc:703.61,  var:-23.71 },
+];
+/* Variance Summary — top / bottom 5 items by variance $ (actual − ideal) */
+const DB_VAR = {
+  top:[['Carne Asada (Flap Meat)',178.51,9.30],['Shrimp 31/40 P&D',131.31,12.64],['Pacific Cod Fillet',118.41,3.11],['Hass Avocado',116.70,10.97],['Mahi Mahi Portion',26.53,2.79]],
+  bottom:[['Fountain Syrup (BIB)',-25.07,-4.49],['Mayonnaise (White Sauce)',1.10,1.00],['Horchata Concentrate',1.36,0.81],['White Onion',1.84,3.56],['Salsa Verde',3.26,1.57]],
+};
+const AI_MSGS = ['Act. Food Cost % is 1.40 pts above ideal','Carne asada is 9.3% over recipe since Sep 22','Avocado waste is 3x normal','US Foods short-shipped flour tortillas'];
+
+const fmtMoney = v => (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtVal = (v, f) => f === 'money' ? fmtMoney(v) : v.toFixed(2) + '%';
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+function dbTip(e, html){ const t = document.getElementById('tip'); if (!html) { t.classList.remove('show'); return; } t.innerHTML = html; t.classList.add('show'); t.style.left = Math.min(e.clientX + 12, innerWidth - t.offsetWidth - 8) + 'px'; t.style.top = (e.clientY - 38) + 'px'; }
+
+function niceTicks(min, max, n){
+  const span = max - min || 1, raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1,2,2.5,5,10].map(m => m * mag).find(s => s >= raw);
+  const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step, t = [];
+  for (let v = lo; v <= hi + step / 2; v += step) t.push(+v.toFixed(6));
+  return t;
+}
+
+function dbLine(m){
+  const M = DB_METRICS[m], svg = document.getElementById('lineSvg');
+  const L = 96, R = 800, T = 20, B = 260;
+  const ticks = niceTicks(Math.min(...M.vals), Math.max(...M.vals), 4);
+  const lo = ticks[0], hi = ticks[ticks.length - 1];
+  const x = i => L + 40 + i * ((R - L - 80) / (M.vals.length - 1));
+  const y = v => B - (v - lo) / (hi - lo) * (B - T);
+  const tickLbl = v => M.fmt === 'money' ? '$' + Math.round(v).toLocaleString('en-US') : (Math.round(v * 100) / 100) + '%';
+  let h = '';
+  ticks.forEach(t => { h += `<line x1="${L}" x2="${R}" y1="${y(t)}" y2="${y(t)}" stroke="${t === 0 && lo < 0 ? '#c7cbd4' : '#eceef3'}"/><text x="${L - 10}" y="${y(t) + 4}" text-anchor="end" font-size="12" fill="#2b3350">${tickLbl(t)}</text>`; });
+  h += `<line x1="${L}" x2="${R}" y1="${B}" y2="${B}" stroke="#c7cbd4"/>`;
+  h += `<polyline fill="none" stroke="${M.col}" stroke-width="1.6" points="${M.vals.map((v, i) => x(i) + ',' + y(v)).join(' ')}"/>`;
+  M.vals.forEach((v, i) => {
+    h += `<line x1="${x(i)}" x2="${x(i)}" y1="${B}" y2="${B + 5}" stroke="#c7cbd4"/><text x="${x(i)}" y="${B + 22}" text-anchor="middle" font-size="12.5" fill="#2b3350">${DB_WEEKS[i]}</text>`;
+    const tip = `<b>${DB_WEEKS[i]}</b> · ${fmtVal(v, M.fmt)}${DB_NOTE[i] ? '<br><span style=&quot;opacity:.75&quot;>' + DB_NOTE[i] + '</span>' : ''}`;
+    h += `<circle cx="${x(i)}" cy="${y(v)}" r="${i === M.vals.length - 1 ? 5.5 : 4.5}" fill="${M.col}" stroke="#fff" stroke-width="1.5" style="cursor:pointer" onmousemove="dbTip(event,'${tip.replace(/'/g, '&#39;')}')" onmouseleave="dbTip(event)"/>`;
+  });
+  svg.innerHTML = h;
+  document.getElementById('lineTitle').textContent = M.title;
+}
+
+function dbDonut(m){
+  const M = DB_METRICS[m], svg = document.getElementById('donutSvg');
+  const rows = DB_CATS.map(c => ({ n:c.n, c:c.c, v:c[m === 'afc' ? 'afc' : m] })).filter(r => r.v > 0);
+  const total = rows.reduce((s, r) => s + r.v, 0);
+  const cx = 220, cy = 125, ro = 82, ri = 40;
+  let a = -Math.PI / 2, h = '';
+  rows.forEach(r => {
+    const f = r.v / total, a2 = a + f * Math.PI * 2, big = f > 0.5 ? 1 : 0;
+    const p = (rad, ang) => [cx + rad * Math.cos(ang), cy + rad * Math.sin(ang)];
+    const [x1, y1] = p(ro, a), [x2, y2] = p(ro, a2), [x3, y3] = p(ri, a2), [x4, y4] = p(ri, a);
+    const tip = `<b>${esc(r.n)}</b> · ${fmtMoney(r.v)} (${(f * 100).toFixed(2)}%)`;
+    h += `<path d="M${x1},${y1} A${ro},${ro} 0 ${big} 1 ${x2},${y2} L${x3},${y3} A${ri},${ri} 0 ${big} 0 ${x4},${y4} Z" fill="${r.c}" stroke="#fff" stroke-width="1" style="cursor:pointer" onmousemove="dbTip(event,'${tip.replace(/'/g, '&#39;')}')" onmouseleave="dbTip(event)"/>`;
+    // leader line + label
+    const mid = (a + a2) / 2, [lx1, ly1] = p(ro + 2, mid), [lx2, ly2] = p(ro + 16, mid);
+    const right = Math.cos(mid) >= 0, lx3 = lx2 + (right ? 14 : -14);
+    h += `<polyline points="${lx1},${ly1} ${lx2},${ly2} ${lx3},${ly2}" fill="none" stroke="#9aa2ae" stroke-width="1"/>`;
+    h += `<text x="${lx3 + (right ? 4 : -4)}" y="${ly2 + 4}" text-anchor="${right ? 'start' : 'end'}" font-size="12" fill="#2b3350">${(f * 100).toFixed(2)}%</text>`;
+    a = a2;
+  });
+  svg.innerHTML = h;
+  document.getElementById('legend').innerHTML = rows.map(r => `<div><i style="background:${r.c}"></i>${esc(r.n)}</div>`).join('');
+  document.getElementById('donutTitle').textContent = M.donut;
+  document.getElementById('donutSub').textContent = m === 'var'
+    ? 'By category · Sep 27 weekly count · categories over ideal only (Beverage is $23.71 under)'
+    : 'By category · Sep 27 weekly count';
+}
+
+function dbVarSummary(){
+  const row = r => `<tr><td>${esc(r[0])}</td><td class="c ${r[1] > 0 ? 'pos' : 'neg'}">${fmtMoney(r[1])}</td><td class="r ${r[1] > 0 ? 'pos' : 'neg'}">${r[2].toFixed(2)} %</td></tr>`;
+  document.getElementById('vsBody').innerHTML =
+    `<tr class="grp"><td colspan="3">Top 5 Variance</td></tr>${DB_VAR.top.map(row).join('')}` +
+    `<tr class="grp"><td colspan="3">Bottom 5 Variance</td></tr>${DB_VAR.bottom.map(row).join('')}`;
+}
+
+function dbSelect(m){
+  document.querySelectorAll('.kpi').forEach(k => k.classList.toggle('on', k.dataset.m === m));
+  dbLine(m); dbDonut(m);
+}
+
+/* AI tile: rotate the headline insights */
+(function(){
+  let i = 0;
+  setInterval(() => {
+    const el = document.getElementById('aiMsg'); if (!el) return;
+    el.style.opacity = 0;
+    setTimeout(() => { i = (i + 1) % AI_MSGS.length; el.textContent = AI_MSGS[i]; el.style.opacity = 1; }, 300);
+  }, 4500);
+})();
+
+dbSelect('inv');
+dbVarSummary();
+</script>
+</body>
+</html>
